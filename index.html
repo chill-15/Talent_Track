@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TalentTrack – Skill Based Job Recommendation System</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">TalentTrack</div>
+    <div class="nav-links">
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+      <a href="login.html"    class="nav-btn ghost">Login</a>
+      <a href="register.html" class="nav-btn outline">Register</a>
+      <a href="admin.html"    class="nav-btn primary">Admin</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">✦ AI-Powered Skill Matching</div>
+    <h1>Meet <span class="grad-text">TalentTrack</span></h1>
+    <p class="hero-sub">Tracks your skills and recommends suitable jobs — with intelligent gap analysis, course recommendations, and a personal career advisor.</p>
+    <div class="hero-btns">
+      <a href="register.html" class="btn btn-primary">✦ Get Started Free</a>
+      <a href="login.html"    class="btn btn-secondary">User Login</a>
+      <a href="admin.html"    class="btn btn-outline-sec">Admin Panel</a>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <div class="container">
+    <h2 class="section-heading">Why TalentTrack?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(108,157,255,.12)">🎯</div>
+        <h3>Skill Matching</h3>
+        <p>Real-time match scores calculated against every job requirement using our algorithm.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(167,139,250,.12)">🧠</div>
+        <h3>Resume Extraction</h3>
+        <p>Upload your PDF resume and skills are auto-detected from the content instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(110,231,183,.12)">📚</div>
+        <h3>Course Recommendations</h3>
+        <p>Skill gaps trigger personalised course suggestions so you can upskill faster.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(255,179,71,.12)">🤖</div>
+        <h3>Career Advisor</h3>
+        <p>Chat with an AI-powered career advisor for personalised guidance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(255,107,138,.12)">📊</div>
+        <h3>Application Tracking</h3>
+        <p>Monitor all your job applications and their live status in one place.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:rgba(52,211,153,.12)">🏢</div>
+        <h3>Admin Dashboard</h3>
+        <p>Full admin panel to post jobs, manage applicants, and view analytics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="steps-section">
+  <div class="container">
+    <h2 class="section-heading">How It Works</h2>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><h3>Create Profile</h3><p>Register and fill in your skills, education and experience.</p></div>
+      <div class="step-card"><div class="step-num">2</div><h3>Upload Resume</h3><p>Upload your PDF resume — skills are auto-extracted instantly.</p></div>
+      <div class="step-card"><div class="step-num">3</div><h3>Get Matched</h3><p>Our algorithm ranks every job by how well it fits your skills.</p></div>
+      <div class="step-card"><div class="step-num">4</div><h3>Apply &amp; Track</h3><p>Apply with one click and track your application status live.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-brand">TalentTrack</div>
+    <p>© 2024 TalentTrack · Skill Based Job Recommendation System</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

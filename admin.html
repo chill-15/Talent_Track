@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TalentTrack – Admin Job Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════════════════════
+   THEME VARIABLES — mirrors style.css palette exactly
+══════════════════════════════════════════════════════════ */
+:root {
+  --primary:   #6C9DFF;
+  --secondary: #A78BFA;
+  --accent:    #6EE7B7;
+  --bg:        #F5F7FB;
+  --bg2:       #EEF2FB;
+  --card:      #FFFFFF;
+  --text:      #1E2A3B;
+  --muted:     #6B7A99;
+  --border:    #E8EDF5;
+  --danger:    #FF6B8A;
+  --warning:   #FFB347;
+  --success:   #34D399;
+  --grad:      linear-gradient(135deg,#6C9DFF 0%,#A78BFA 100%);
+  --shadow:    0 4px 24px rgba(108,157,255,.13);
+  --shover:    0 8px 40px rgba(108,157,255,.22);
+  --radius:    16px;
+  --rsm:       10px;
+}
+[data-theme="dark"] {
+  --bg:    #0F1729;
+  --bg2:   #162040;
+  --card:  #1A2540;
+  --text:  #E8EEFF;
+  --muted: #8895B3;
+  --border:#253155;
+  --shadow:0 4px 24px rgba(0,0,0,.35);
+  --shover:0 8px 40px rgba(0,0,0,.5);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;transition:background .3s,color .3s;
+}
+h1,h2,h3,h4{font-family:'Sora',sans-serif;}
+a{color:var(--primary);text-decoration:none;}
+button{cursor:pointer;font-family:'DM Sans',sans-serif;}
+textarea{resize:vertical;min-height:80px;}
+input,select,textarea,button{font-family:inherit;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════════════ */
+.layout{display:flex;min-height:100vh;}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════ */
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:var(--card);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  transition:background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:20px 16px 18px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;flex-shrink:0;
+  font-family:'Sora',sans-serif;
+}
+.logo-text{font-size:15px;font-weight:800;color:var(--text);font-family:'Sora',sans-serif;}
+.logo-badge{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+
+.sidebar-nav{padding:12px 10px;flex:1;}
+.nav-section{margin-bottom:18px;}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:var(--rsm);
+  cursor:pointer;font-size:13.5px;font-weight:500;color:var(--muted);
+  transition:all .15s;margin-bottom:2px;
+}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active{
+  background:rgba(108,157,255,.12);
+  color:var(--primary);font-weight:600;
+}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+
+.sidebar-footer{padding:14px;border-top:1px solid var(--border);}
+.admin-pill{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);
+}
+.admin-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.admin-name{font-size:12.5px;font-weight:600;color:var(--text);}
+.admin-role{font-size:11px;color:var(--muted);}
+
+/* ══════════════════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════════════════ */
+.topbar{
+  height:64px;background:var(--card);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 12px rgba(108,157,255,.08);
+  transition:background .3s,border-color .3s;
+}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.page-crumb{font-size:13px;color:var(--muted);}
+.page-title-sm{font-size:15px;font-weight:700;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+
+/* Theme toggle — identical to style.css .theme-btn */
+.theme-btn{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--bg2);
+  font-size:1rem;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;cursor:pointer;
+}
+.theme-btn:hover{border-color:var(--primary);}
+
+.topbar-btn{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:50px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);
+  background:var(--bg2);color:var(--muted);transition:all .15s;
+}
+.topbar-btn:hover{color:var(--text);border-color:var(--primary);}
+.topbar-btn.primary{
+  background:var(--grad);border-color:transparent;color:#fff;
+  box-shadow:0 2px 10px rgba(108,157,255,.35);
+}
+.topbar-btn.primary:hover{opacity:.9;transform:translateY(-1px);}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════════════════════════ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;}
+.content{padding:28px;flex:1;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ══════════════════════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════════════════════ */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 30% 30%,rgba(108,157,255,.1) 0%,transparent 55%),
+    radial-gradient(ellipse at 70% 80%,rgba(167,139,250,.08) 0%,transparent 55%);
+}
+.login-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:24px;padding:44px 40px;width:100%;max-width:400px;
+  box-shadow:0 8px 50px rgba(108,157,255,.15);
+}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo .icon{
+  width:56px;height:56px;border-radius:16px;background:var(--grad);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;color:#fff;margin-bottom:14px;
+  font-family:'Sora',sans-serif;
+}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;font-family:'Sora',sans-serif;}
+.login-logo p{font-size:13px;color:var(--muted);}
+
+.field-group{margin-bottom:16px;}
+.field-label{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;display:block;}
+.field-input{
+  width:100%;padding:11px 14px;background:var(--bg2);
+  border:1.5px solid var(--border);border-radius:var(--rsm);
+  font-size:14px;color:var(--text);outline:none;transition:all .2s;
+}
+.field-input:focus{border-color:var(--primary);background:var(--card);box-shadow:0 0 0 3px rgba(108,157,255,.12);}
+.field-input::placeholder{color:var(--muted);}
+
+.login-btn{
+  width:100%;padding:12px;background:var(--grad);
+  border:none;border-radius:var(--rsm);
+  font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;
+  transition:all .2s;margin-top:8px;
+  box-shadow:0 4px 20px rgba(108,157,255,.4);
+}
+.login-btn:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 8px 30px rgba(108,157,255,.5);}
+.login-error{color:var(--danger);font-size:12.5px;text-align:center;margin-top:10px;display:none;}
+.login-hint{
+  text-align:center;margin-top:16px;font-size:12px;color:var(--muted);
+}
+.login-hint span{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:3px 8px;
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--text);
+}
+
+/* login theme toggle positioned top-right */
+.login-theme-btn{
+  position:fixed;top:18px;right:20px;
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--card);
+  font-size:1rem;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;cursor:pointer;z-index:50;
+}
+.login-theme-btn:hover{border-color:var(--primary);}
+
+/* ══════════════════════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px 22px;
+  transition:all .25s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shover);border-color:rgba(108,157,255,.3);}
+.stat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.stat-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.stat-icon-box{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.si-blue{background:rgba(108,157,255,.15);color:var(--primary);}
+.si-green{background:rgba(110,231,183,.15);color:#059669;}
+.si-amber{background:rgba(255,179,71,.15);color:#d97706;}
+.si-purple{background:rgba(167,139,250,.15);color:var(--secondary);}
+.stat-num{font-size:28px;font-weight:800;font-family:'Sora',sans-serif;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+
+/* ══════════════════════════════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════════════════════════════ */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.section-title{font-size:17px;font-weight:700;color:var(--text);font-family:'Sora',sans-serif;}
+.section-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+
+/* ══════════════════════════════════════════════════════════
+   FILTERS BAR
+══════════════════════════════════════════════════════════ */
+.filters-bar{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 18px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;
+}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:50px;padding:8px 14px;flex:1;min-width:200px;
+  transition:all .2s;
+}
+.search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,157,255,.1);}
+.search-box input{background:none;border:none;outline:none;font-size:13.5px;color:var(--text);width:100%;}
+.search-box input::placeholder{color:var(--muted);}
+.search-icon{color:var(--muted);font-size:14px;flex-shrink:0;}
+.filter-select{
+  padding:8px 14px;background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:50px;font-size:13px;color:var(--muted);
+  cursor:pointer;outline:none;min-width:130px;transition:all .2s;
+}
+.filter-select:focus{border-color:var(--primary);}
+.filter-select option{background:var(--card);color:var(--text);}
+.clear-btn{
+  padding:8px 16px;background:transparent;border:1.5px solid var(--border);
+  border-radius:50px;font-size:13px;color:var(--muted);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.clear-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ══════════════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════════════ */
+.table-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.table-inner{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--bg2);border-bottom:1px solid var(--border);}
+th{
+  padding:12px 16px;text-align:left;
+  font-size:11px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;
+}
+td{
+  padding:14px 16px;font-size:13.5px;color:var(--muted);
+  border-bottom:1px solid var(--border);vertical-align:middle;
+}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .12s;}
+tbody tr:hover{background:var(--bg2);}
+
+.job-title-cell .title{font-size:14px;font-weight:600;color:var(--text);}
+.job-title-cell .id{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+
+.badge{
+  display:inline-flex;align-items:center;
+  padding:4px 10px;border-radius:50px;
+  font-size:11.5px;font-weight:600;white-space:nowrap;
+}
+.badge-blue{background:rgba(108,157,255,.12);color:var(--primary);}
+.badge-green{background:rgba(110,231,183,.12);color:#059669;}
+.badge-amber{background:rgba(255,179,71,.12);color:#d97706;}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--secondary);}
+.badge-red{background:rgba(255,107,138,.12);color:var(--danger);}
+.badge-gray{background:var(--bg2);color:var(--muted);}
+
+.actions-cell{display:flex;align-items:center;gap:6px;}
+.action-btn{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:none;transition:all .15s;font-size:14px;
+}
+.action-btn.view{background:rgba(108,157,255,.12);color:var(--primary);}
+.action-btn.view:hover{background:var(--primary);color:#fff;}
+.action-btn.edit{background:rgba(255,179,71,.12);color:#d97706;}
+.action-btn.edit:hover{background:#F59E0B;color:#fff;}
+.action-btn.del{background:rgba(255,107,138,.12);color:var(--danger);}
+.action-btn.del:hover{background:var(--danger);color:#fff;}
+
+.empty-row td{text-align:center;padding:48px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-text{font-size:14px;font-weight:500;}
+.empty-sub{font-size:12.5px;margin-top:4px;}
+.results-count{font-size:12.5px;color:var(--muted);padding:10px 16px;border-top:1px solid var(--border);}
+
+/* ══════════════════════════════════════════════════════════
+   FORM CARD
+══════════════════════════════════════════════════════════ */
+.form-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px 30px;max-width:820px;
+  box-shadow:var(--shadow);
+}
+.form-section{margin-bottom:28px;}
+.form-section-title{
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:16px;padding-bottom:10px;
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:7px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:12.5px;font-weight:600;color:var(--muted);}
+.required{color:var(--danger);margin-left:2px;}
+.form-input{
+  padding:10px 14px;background:var(--bg2);
+  border:1.5px solid var(--border);border-radius:var(--rsm);
+  font-size:13.5px;color:var(--text);outline:none;transition:all .2s;
+}
+.form-input:focus{border-color:var(--primary);background:var(--card);box-shadow:0 0 0 3px rgba(108,157,255,.12);}
+.form-input::placeholder{color:var(--muted);}
+.form-textarea{min-height:90px;resize:vertical;line-height:1.6;}
+.form-hint{font-size:11.5px;color:var(--muted);}
+.form-error-msg{font-size:12px;color:var(--danger);display:none;}
+.form-error-msg.show{display:block;}
+
+.form-actions{display:flex;gap:12px;align-items:center;padding-top:8px;flex-wrap:wrap;}
+.btn-submit{
+  padding:11px 24px;background:var(--grad);border:none;
+  border-radius:50px;font-size:14px;font-weight:700;color:#fff;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;
+  box-shadow:0 4px 20px rgba(108,157,255,.4);
+}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 30px rgba(108,157,255,.5);}
+.btn-cancel{
+  padding:11px 20px;background:transparent;border:1.5px solid var(--border);
+  border-radius:50px;font-size:14px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.btn-cancel:hover{border-color:var(--primary);color:var(--primary);}
+
+.form-success{
+  display:none;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:rgba(110,231,183,.1);border:1px solid rgba(110,231,183,.3);
+  border-radius:var(--rsm);color:#059669;font-size:13.5px;font-weight:600;
+  margin-bottom:20px;
+}
+.form-success.show{display:flex;}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════ */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:100;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 80px rgba(0,0,0,.2);
+  animation:modalIn .2s ease;
+}
+.modal-box.sm{max-width:400px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px)scale(.97);}to{opacity:1;transform:translateY(0)scale(1);}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 0;}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);font-family:'Sora',sans-serif;}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;background:var(--bg2);
+  border:none;cursor:pointer;font-size:16px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.modal-close:hover{background:rgba(255,107,138,.12);color:var(--danger);}
+.modal-body{padding:20px 24px 24px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border);}
+
+.btn-danger{
+  padding:9px 18px;background:var(--danger);border:none;border-radius:50px;
+  font-size:13.5px;font-weight:700;color:#fff;cursor:pointer;transition:all .15s;
+}
+.btn-danger:hover{opacity:.9;transform:translateY(-1px);}
+.btn-ghost{
+  padding:9px 16px;background:transparent;border:1.5px solid var(--border);
+  border-radius:50px;font-size:13.5px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .15s;
+}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+
+/* ── View detail ── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.detail-item{background:var(--bg2);border-radius:var(--rsm);padding:14px;}
+.detail-item.full{grid-column:1/-1;}
+.detail-key{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.detail-val{font-size:13.5px;color:var(--text);line-height:1.5;}
+.skills-cloud{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.skill-tag{
+  padding:4px 10px;background:rgba(108,157,255,.1);border:1px solid rgba(108,157,255,.25);
+  border-radius:50px;font-size:12px;font-weight:600;color:var(--primary);
+}
+
+/* ── Confirm dialog ── */
+.confirm-icon{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,107,138,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin:0 auto 16px;
+}
+.confirm-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;font-family:'Sora',sans-serif;}
+.confirm-sub{font-size:13.5px;color:var(--muted);text-align:center;line-height:1.6;}
+.confirm-job{
+  background:var(--bg2);border-radius:var(--rsm);
+  padding:10px 14px;margin:14px 0;
+  font-size:13.5px;font-weight:600;color:var(--text);text-align:center;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+#toast-wrap{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  display:flex;flex-direction:column;gap:8px;
+}
+.toast{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 18px;border-radius:12px;
+  box-shadow:var(--shadow);font-size:13.5px;font-weight:600;
+  animation:toastIn .25s ease;min-width:240px;
+  background:var(--card);border-left:4px solid var(--primary);
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-color:var(--accent);}
+.toast.error{border-color:var(--danger);}
+.toast.info{border-color:var(--primary);}
+.toast-icon{font-size:16px;}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════ */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .form-grid,.form-grid.cols3{grid-template-columns:1fr;}
+  .detail-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .filters-bar{flex-direction:column;align-items:stretch;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- ══════ CONFIRM DELETE MODAL ══════ -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal-box sm">
+    <div class="modal-body" style="text-align:center;padding:28px 24px 8px;">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title">Delete Job Posting?</div>
+      <div class="confirm-sub">This action cannot be undone. The job will be permanently removed and will no longer appear in user recommendations.</div>
+      <div class="confirm-job" id="confirm-job-name"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost"  onclick="closeModal('confirm-modal')">Cancel</button>
+      <button class="btn-danger" id="confirm-delete-btn">🗑️ Delete Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ VIEW JOB MODAL ══════ -->
+<div class="modal-backdrop" id="view-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="view-modal-title">Job Details</div>
+      <button class="modal-close" onclick="closeModal('view-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="view-modal-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="screen-login" class="login-wrap">
+  <!-- theme toggle on login page -->
+  <button class="login-theme-btn" onclick="toggleTheme()" id="login-theme-btn">🌙</button>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">TT</div>
+      <h1>Admin Portal</h1>
+      <p>TalentTrack Job Management System</p>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email Address</label>
+      <input class="field-input" id="login-email" type="email"
+             placeholder="admin@talenttrack.com" value="admin@talenttrack.com"/>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Password</label>
+      <input class="field-input" id="login-pass" type="password"
+             placeholder="••••••••" value="admin123"
+             onkeydown="if(event.key==='Enter') doLogin()"/>
+    </div>
+    <div class="login-error" id="login-error">❌ Invalid credentials. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()">Sign In to Dashboard →</button>
+    <div class="login-hint">
+      Credentials: <span>admin@talenttrack.com</span> / <span>admin123</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div id="screen-dash" style="display:none;">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">TT</div>
+      <div>
+        <div class="logo-text">TalentTrack</div>
+        <div class="logo-badge">Admin Portal</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="switchTab('post')" id="nav-post">
+          <span class="nav-icon">➕</span> Post New Job
+        </div>
+        <div class="nav-item" onclick="switchTab('manage')" id="nav-manage">
+          <span class="nav-icon">💼</span> Manage Jobs
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Account</div>
+        <div class="nav-item" onclick="doLogout()">
+          <span class="nav-icon">🚪</span> Sign Out
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-pill">
+        <div class="admin-avatar">AD</div>
+        <div>
+          <div class="admin-name">Admin</div>
+          <div class="admin-role">Job Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="page-crumb">TalentTrack /</span>
+        <span class="page-title-sm" id="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <!-- ★ Theme toggle — same circular button as rest of the app ★ -->
+        <button class="theme-btn" onclick="toggleTheme()" id="dash-theme-btn">🌙</button>
+        <button class="topbar-btn" onclick="switchTab('manage')">💼 View All Jobs</button>
+        <button class="topbar-btn primary" onclick="switchTab('post')">+ Post Job</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ══ DASHBOARD TAB ══ -->
+      <div id="tab-dashboard" class="screen active">
+        <div class="section-header" style="margin-bottom:24px;">
+          <div>
+            <div class="section-title">Welcome back, Admin 👋</div>
+            <div class="section-sub">Here's what's happening on the platform today.</div>
+          </div>
+        </div>
+        <div class="stats-row" id="stats-row"></div>
+
+        <div class="section-header">
+          <div>
+            <div class="section-title">Recent Job Postings</div>
+            <div class="section-sub">Latest 5 jobs posted on the platform</div>
+          </div>
+          <button class="topbar-btn" onclick="switchTab('manage')">View All →</button>
+        </div>
+        <div class="table-card">
+          <div class="table-inner">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job Title</th><th>Company</th><th>Location</th>
+                  <th>Type</th><th>Experience</th><th>Posted</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recent-jobs-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ POST JOB TAB ══ -->
+      <div id="tab-post" class="screen" style="display:none;">
+        <div class="section-header" style="margin-bottom:24px;">
+          <div>
+            <div class="section-title" id="form-title">Post New Job</div>
+            <div class="section-sub"  id="form-sub">Fill in the details to create a new job listing</div>
+          </div>
+        </div>
+
+        <div class="form-success" id="form-success">
+          <span>✅</span>
+          <span id="form-success-msg">Job posted successfully! It is now visible to all users.</span>
+        </div>
+
+        <div class="form-card">
+          <input type="hidden" id="edit-id"/>
+
+          <!-- Basic Info -->
+          <div class="form-section">
+            <div class="form-section-title">📋 Basic Information</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Job Title <span class="required">*</span></label>
+                <input class="form-input" id="f-title" placeholder="e.g. Senior React Developer"/>
+                <span class="form-error-msg" id="err-title">Job title is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Company Name <span class="required">*</span></label>
+                <input class="form-input" id="f-company" placeholder="e.g. TechCorp Solutions"/>
+                <span class="form-error-msg" id="err-company">Company name is required</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requirements -->
+          <div class="form-section">
+            <div class="form-section-title">⚙️ Requirements</div>
+            <div class="form-grid">
+              <div class="form-group full">
+                <label class="form-label">Required Skills <span class="required">*</span></label>
+                <input class="form-input" id="f-skills" placeholder="e.g. React, Node.js, MongoDB, Docker"/>
+                <span class="form-hint">Separate multiple skills with commas</span>
+                <span class="form-error-msg" id="err-skills">At least one skill is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Experience Level <span class="required">*</span></label>
+                <select class="form-input" id="f-experience">
+                  <option value="">Select experience level</option>
+                  <option value="Fresher (0 years)">Fresher (0 years)</option>
+                  <option value="Junior (1-3 years)">Junior (1-3 years)</option>
+                  <option value="Mid-level (3-5 years)">Mid-level (3-5 years)</option>
+                  <option value="Senior (5+ years)">Senior (5+ years)</option>
+                </select>
+                <span class="form-error-msg" id="err-experience">Experience level is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Education</label>
+                <select class="form-input" id="f-education">
+                  <option value="">Any</option>
+                  <option value="High School">High School</option>
+                  <option value="Diploma">Diploma</option>
+                  <option value="Bachelor's Degree">Bachelor's Degree</option>
+                  <option value="Master's Degree">Master's Degree</option>
+                  <option value="PhD">PhD</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Details -->
+          <div class="form-section">
+            <div class="form-section-title">📍 Job Details</div>
+            <div class="form-grid cols3">
+              <div class="form-group">
+                <label class="form-label">Location <span class="required">*</span></label>
+                <input class="form-input" id="f-location" list="location-list" placeholder="e.g. Bangalore / Remote"/>
+                <datalist id="location-list">
+                  <option value="Remote"><option value="Bangalore">
+                  <option value="Hyderabad"><option value="Mumbai">
+                  <option value="Delhi"><option value="Chennai">
+                  <option value="Pune"><option value="Kolkata">
+                </datalist>
+                <span class="form-error-msg" id="err-location">Location is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Job Type <span class="required">*</span></label>
+                <select class="form-input" id="f-jobtype">
+                  <option value="">Select type</option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Remote">Remote</option>
+                  <option value="Freelance">Freelance</option>
+                </select>
+                <span class="form-error-msg" id="err-jobtype">Job type is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Salary Range</label>
+                <input class="form-input" id="f-salary" placeholder="e.g. ₹8–12 LPA"/>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:16px;">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-input" id="f-category">
+                  <option value="Technology">Technology</option>
+                  <option value="Data / Analytics">Data / Analytics</option>
+                  <option value="Design">Design</option>
+                  <option value="DevOps / Cloud">DevOps / Cloud</option>
+                  <option value="AI / ML">AI / ML</option>
+                  <option value="Product">Product</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Finance">Finance</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Icon (emoji)</label>
+                <input class="form-input" id="f-icon" placeholder="💻" maxlength="4"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-section">
+            <div class="form-section-title">📝 Job Description</div>
+            <div class="form-group">
+              <label class="form-label">Description <span class="required">*</span></label>
+              <textarea class="form-input form-textarea" id="f-description"
+                placeholder="Describe the role, responsibilities, team culture..."></textarea>
+              <span class="form-error-msg" id="err-description">Job description is required</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-submit" id="submit-btn" onclick="submitJob()">
+              <span id="submit-icon">🚀</span>
+              <span id="submit-text">Post Job</span>
+            </button>
+            <button class="btn-cancel" onclick="resetForm()">Clear Form</button>
+            <button class="btn-cancel" onclick="switchTab('manage')" id="cancel-edit-btn" style="display:none">Cancel Edit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MANAGE JOBS TAB ══ -->
+      <div id="tab-manage" class="screen" style="display:none;">
+        <div class="section-header" style="margin-bottom:20px;">
+          <div>
+            <div class="section-title">Manage Job Postings</div>
+            <div class="section-sub">View, edit, delete and filter all job listings</div>
+          </div>
+          <button class="topbar-btn primary" onclick="switchTab('post')">+ Post New Job</button>
+        </div>
+
+        <div class="filters-bar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input id="search-input" placeholder="Search by title, company or skill..." oninput="renderManageTable()"/>
+          </div>
+          <select class="filter-select" id="filter-location" onchange="renderManageTable()">
+            <option value="">All Locations</option>
+          </select>
+          <select class="filter-select" id="filter-experience" onchange="renderManageTable()">
+            <option value="">All Experience</option>
+            <option value="Fresher (0 years)">Fresher</option>
+            <option value="Junior (1-3 years)">Junior (1-3 yrs)</option>
+            <option value="Mid-level (3-5 years)">Mid-level (3-5 yrs)</option>
+            <option value="Senior (5+ years)">Senior (5+ yrs)</option>
+          </select>
+          <select class="filter-select" id="filter-type" onchange="renderManageTable()">
+            <option value="">All Types</option>
+            <option>Full-time</option><option>Part-time</option>
+            <option>Contract</option><option>Internship</option>
+            <option>Remote</option><option>Freelance</option>
+          </select>
+          <button class="clear-btn" onclick="clearFilters()">✕ Clear</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-inner">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job Title</th><th>Company</th><th>Location</th>
+                  <th>Experience</th><th>Type</th><th>Skills</th>
+                  <th>Posted</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="manage-jobs-body"></tbody>
+            </table>
+          </div>
+          <div class="results-count" id="results-count"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+</div><!-- /screen-dash -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   THEME — mirrors script.js toggleTheme() exactly
+   Reads/writes localStorage "tt_theme" and data-theme attr
+═══════════════════════════════════════════════════════════ */
+function applyTheme() {
+  const t = localStorage.getItem("tt_theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+  document.querySelectorAll(".theme-btn, .login-theme-btn").forEach(btn => {
+    btn.textContent = t === "dark" ? "☀️" : "🌙";
+  });
+}
+
+function toggleTheme() {
+  const cur  = document.documentElement.getAttribute("data-theme") || "light";
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("tt_theme", next);
+  document.querySelectorAll(".theme-btn, .login-theme-btn").forEach(btn => {
+    btn.textContent = next === "dark" ? "☀️" : "🌙";
+  });
+}
+
+// Apply immediately on load
+applyTheme();
+
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTS & STATE
+═══════════════════════════════════════════════════════════ */
+const ADMIN_EMAIL    = "admin@talenttrack.com";
+const ADMIN_PASSWORD = "admin123";
+const STORAGE_KEY    = "tt_jobs";
+const SESSION_KEY    = "tt_admin_session";
+let pendingDeleteId  = null;
+
+const SEED_JOBS = [
+  { id:"j_seed_1", title:"Software Developer",       company:"InnoTech Pvt Ltd",   skills:["python","sql","django"],                   experience:"Junior (1-3 years)",    location:"Bangalore", jobType:"Full-time",  salary:"₹5–8 LPA",   category:"Technology",      icon:"💻", description:"Join our growing engineering team to build scalable backend services using Python and Django.", education:"Bachelor's Degree", postedAt:new Date(Date.now()-86400000*6).toISOString() },
+  { id:"j_seed_2", title:"Web Developer",             company:"Webify Studios",     skills:["html","css","javascript","react"],         experience:"Fresher (0 years)",     location:"Remote",    jobType:"Full-time",  salary:"₹3–6 LPA",   category:"Technology",      icon:"🌐", description:"Build beautiful user interfaces using React, collaborating with designers and backend engineers.",  education:"Any",               postedAt:new Date(Date.now()-86400000*5).toISOString() },
+  { id:"j_seed_3", title:"Data Analyst",              company:"DataMind Analytics", skills:["python","excel","sql","tableau"],          experience:"Mid-level (3-5 years)", location:"Hyderabad", jobType:"Full-time",  salary:"₹7–12 LPA",  category:"Data / Analytics", icon:"📊", description:"Analyze large datasets to extract actionable business insights and build Tableau dashboards.",       education:"Bachelor's Degree", postedAt:new Date(Date.now()-86400000*4).toISOString() },
+  { id:"j_seed_4", title:"DevOps Engineer",           company:"Scalify Cloud",      skills:["docker","kubernetes","aws","ci/cd"],       experience:"Mid-level (3-5 years)", location:"Hyderabad", jobType:"Full-time",  salary:"₹10–16 LPA", category:"DevOps / Cloud",   icon:"🚀", description:"Build and maintain cloud infrastructure on AWS with CI/CD pipelines and microservices.",           education:"Bachelor's Degree", postedAt:new Date(Date.now()-86400000*3).toISOString() },
+  { id:"j_seed_5", title:"Machine Learning Engineer", company:"AI Frontier Labs",   skills:["python","machine learning","tensorflow"],  experience:"Mid-level (3-5 years)", location:"Bangalore", jobType:"Full-time",  salary:"₹12–20 LPA", category:"AI / ML",          icon:"🤖", description:"Design and deploy production-grade ML models for computer vision and NLP applications.",            education:"Master's Degree",   postedAt:new Date(Date.now()-86400000*2).toISOString() },
+  { id:"j_seed_6", title:"React Developer",           company:"AppVision Tech",     skills:["react","javascript","typescript","nodejs"],experience:"Junior (1-3 years)",    location:"Remote",    jobType:"Full-time",  salary:"₹5–9 LPA",   category:"Technology",      icon:"⚛️", description:"Build high-performance React applications, owning frontend features end-to-end.",                  education:"Bachelor's Degree", postedAt:new Date(Date.now()-86400000*1).toISOString() },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════════════════════ */
+function getJobs() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || seedAndGet(); }
+  catch { return seedAndGet(); }
+}
+function seedAndGet() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_JOBS));
+  return [...SEED_JOBS];
+}
+function saveJobs(jobs) { localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs)); }
+function genId() { return "j_" + Date.now() + "_" + Math.random().toString(36).slice(2,7); }
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════════════ */
+function checkSession() { return localStorage.getItem(SESSION_KEY) === "true"; }
+
+function doLogin() {
+  const email = document.getElementById("login-email").value.trim();
+  const pass  = document.getElementById("login-pass").value;
+  const errEl = document.getElementById("login-error");
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+    errEl.style.display = "none";
+    localStorage.setItem(SESSION_KEY, "true");
+    document.getElementById("screen-login").style.display = "none";
+    document.getElementById("screen-dash").style.display  = "block";
+    switchTab("dashboard");
+    showToast("Signed in successfully! 🛡️", "success");
+  } else {
+    errEl.style.display = "block";
+    document.getElementById("login-pass").value = "";
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem(SESSION_KEY);
+  document.getElementById("screen-dash").style.display  = "none";
+  document.getElementById("screen-login").style.display = "flex";
+  showToast("Signed out", "info");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════════════════ */
+const TABS = ["dashboard","post","manage"];
+const TOPBAR_TITLES = { dashboard:"Dashboard", post:"Post New Job", manage:"Manage Jobs" };
+
+function switchTab(name) {
+  TABS.forEach(t => {
+    document.getElementById("tab-" + t).style.display  = t === name ? "block" : "none";
+    const nav = document.getElementById("nav-" + t);
+    if (nav) nav.classList.toggle("active", t === name);
+  });
+  document.getElementById("topbar-title").textContent = TOPBAR_TITLES[name] || name;
+  if (name === "dashboard") renderDashboard();
+  if (name === "manage")    { renderManageTable(); populateFilterDropdowns(); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════════ */
+function renderDashboard() {
+  const jobs = getJobs();
+  const typeCount = jobs.reduce((a,j) => { a[j.jobType]=(a[j.jobType]||0)+1; return a; }, {});
+  const mostType  = Object.entries(typeCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || "—";
+
+  document.getElementById("stats-row").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Total Jobs</span><div class="stat-icon-box si-blue">💼</div></div>
+      <div class="stat-num">${jobs.length}</div><div class="stat-sub">Active listings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Full-time</span><div class="stat-icon-box si-green">✅</div></div>
+      <div class="stat-num">${jobs.filter(j=>j.jobType==="Full-time").length}</div><div class="stat-sub">Permanent roles</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Remote</span><div class="stat-icon-box si-purple">🌐</div></div>
+      <div class="stat-num">${jobs.filter(j=>j.location==="Remote"||j.jobType==="Remote").length}</div><div class="stat-sub">Work from anywhere</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Top Type</span><div class="stat-icon-box si-amber">🏆</div></div>
+      <div class="stat-num" style="font-size:18px;padding-top:4px">${mostType}</div><div class="stat-sub">Most common</div>
+    </div>`;
+
+  const recent = [...jobs].sort((a,b)=>new Date(b.postedAt)-new Date(a.postedAt)).slice(0,5);
+  const tbody  = document.getElementById("recent-jobs-body");
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No jobs posted yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recent.map(j => `
+    <tr>
+      <td><div class="job-title-cell"><div class="title">${j.icon||"💼"} ${esc(j.title)}</div><div class="id">#${j.id}</div></div></td>
+      <td>${esc(j.company)}</td>
+      <td>${esc(j.location)}</td>
+      <td>${typeBadge(j.jobType)}</td>
+      <td>${expBadge(j.experience)}</td>
+      <td style="font-size:12.5px;color:var(--muted);white-space:nowrap">${formatDate(j.postedAt)}</td>
+      <td><div class="actions-cell">
+        <button class="action-btn view" title="View"   onclick="viewJob('${j.id}')">👁</button>
+        <button class="action-btn edit" title="Edit"   onclick="editJob('${j.id}')">✏️</button>
+        <button class="action-btn del"  title="Delete" onclick="confirmDelete('${j.id}')">🗑</button>
+      </div></td>
+    </tr>`).join("");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MANAGE TABLE
+═══════════════════════════════════════════════════════════ */
+function populateFilterDropdowns() {
+  const jobs = getJobs();
+  const locs = [...new Set(jobs.map(j=>j.location).filter(Boolean))].sort();
+  const locSel = document.getElementById("filter-location");
+  const cur = locSel.value;
+  locSel.innerHTML = `<option value="">All Locations</option>` +
+    locs.map(l=>`<option value="${l}"${l===cur?" selected":""}>${l}</option>`).join("");
+}
+
+function clearFilters() {
+  document.getElementById("search-input").value      = "";
+  document.getElementById("filter-location").value   = "";
+  document.getElementById("filter-experience").value = "";
+  document.getElementById("filter-type").value       = "";
+  renderManageTable();
+}
+
+function renderManageTable() {
+  const query = document.getElementById("search-input").value.toLowerCase().trim();
+  const locF  = document.getElementById("filter-location").value;
+  const expF  = document.getElementById("filter-experience").value;
+  const typeF = document.getElementById("filter-type").value;
+
+  let jobs = getJobs();
+  if (query) jobs = jobs.filter(j =>
+    j.title.toLowerCase().includes(query) ||
+    j.company.toLowerCase().includes(query) ||
+    (j.skills||[]).some(s=>s.toLowerCase().includes(query))
+  );
+  if (locF)  jobs = jobs.filter(j=>j.location  === locF);
+  if (expF)  jobs = jobs.filter(j=>j.experience === expF);
+  if (typeF) jobs = jobs.filter(j=>j.jobType    === typeF);
+  jobs = [...jobs].sort((a,b)=>new Date(b.postedAt)-new Date(a.postedAt));
+
+  document.getElementById("results-count").textContent =
+    `Showing ${jobs.length} job${jobs.length!==1?"s":""} ${query||locF||expF||typeF?"(filtered)":""}`;
+
+  const tbody = document.getElementById("manage-jobs-body");
+  if (!jobs.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="8" class="empty-row">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">No jobs found</div>
+        <div class="empty-sub">${query||locF||expF||typeF?"Try adjusting your filters":"Post your first job to get started"}</div>
+      </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = jobs.map(j => `
+    <tr>
+      <td><div class="job-title-cell"><div class="title">${j.icon||"💼"} ${esc(j.title)}</div><div class="id">#${j.id.slice(-8)}</div></div></td>
+      <td>${esc(j.company)}</td>
+      <td>${esc(j.location)}</td>
+      <td>${expBadge(j.experience)}</td>
+      <td>${typeBadge(j.jobType)}</td>
+      <td>
+        <div style="display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden;max-width:160px;">
+          ${(j.skills||[]).slice(0,3).map(s=>`<span class="skill-tag" style="white-space:nowrap;font-size:11px">${esc(s)}</span>`).join("")}
+          ${j.skills&&j.skills.length>3?`<span class="skill-tag" style="font-size:11px">+${j.skills.length-3}</span>`:""}
+        </div>
+      </td>
+      <td style="font-size:12.5px;color:var(--muted);white-space:nowrap">${formatDate(j.postedAt)}</td>
+      <td><div class="actions-cell">
+        <button class="action-btn view" title="View"   onclick="viewJob('${j.id}')">👁</button>
+        <button class="action-btn edit" title="Edit"   onclick="editJob('${j.id}')">✏️</button>
+        <button class="action-btn del"  title="Delete" onclick="confirmDelete('${j.id}')">🗑</button>
+      </div></td>
+    </tr>`).join("");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORM — POST / EDIT
+═══════════════════════════════════════════════════════════ */
+function resetForm() {
+  ["f-title","f-company","f-skills","f-location","f-salary","f-icon","f-description"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  ["f-experience","f-education","f-jobtype"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("f-category").value = "Technology";
+  document.getElementById("edit-id").value    = "";
+  document.getElementById("form-title").textContent = "Post New Job";
+  document.getElementById("form-sub").textContent   = "Fill in the details to create a new job listing";
+  document.getElementById("submit-icon").textContent = "🚀";
+  document.getElementById("submit-text").textContent = "Post Job";
+  document.getElementById("cancel-edit-btn").style.display = "none";
+  document.getElementById("form-success").classList.remove("show");
+  clearValidation();
+}
+
+function clearValidation() {
+  ["err-title","err-company","err-skills","err-experience",
+   "err-location","err-jobtype","err-description"]
+    .forEach(id => document.getElementById(id).classList.remove("show"));
+}
+
+function submitJob() {
+  clearValidation();
+  document.getElementById("form-success").classList.remove("show");
+
+  const title       = document.getElementById("f-title").value.trim();
+  const company     = document.getElementById("f-company").value.trim();
+  const skillsRaw   = document.getElementById("f-skills").value.trim();
+  const experience  = document.getElementById("f-experience").value;
+  const location    = document.getElementById("f-location").value.trim();
+  const jobType     = document.getElementById("f-jobtype").value;
+  const description = document.getElementById("f-description").value.trim();
+
+  let valid = true;
+  if (!title)       { document.getElementById("err-title").classList.add("show");       valid=false; }
+  if (!company)     { document.getElementById("err-company").classList.add("show");     valid=false; }
+  if (!skillsRaw)   { document.getElementById("err-skills").classList.add("show");      valid=false; }
+  if (!experience)  { document.getElementById("err-experience").classList.add("show");  valid=false; }
+  if (!location)    { document.getElementById("err-location").classList.add("show");    valid=false; }
+  if (!jobType)     { document.getElementById("err-jobtype").classList.add("show");     valid=false; }
+  if (!description) { document.getElementById("err-description").classList.add("show"); valid=false; }
+  if (!valid) return;
+
+  const skills   = skillsRaw.split(",").map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const editId   = document.getElementById("edit-id").value;
+  const salary   = document.getElementById("f-salary").value.trim();
+  const education= document.getElementById("f-education").value;
+  const category = document.getElementById("f-category").value || "Technology";
+  const icon     = document.getElementById("f-icon").value.trim() || "💼";
+
+  const jobs = getJobs();
+  if (editId) {
+    const idx = jobs.findIndex(j=>j.id===editId);
+    if (idx !== -1) jobs[idx] = { ...jobs[idx], title, company, skills, experience, education, location, jobType, salary, category, icon, description };
+    saveJobs(jobs);
+    showToast("Job updated successfully! ✅", "success");
+    document.getElementById("form-success-msg").textContent = "Job updated! Changes are live for all users.";
+    document.getElementById("form-success").classList.add("show");
+    resetForm();
+    switchTab("manage");
+  } else {
+    const newJob = { id:genId(), title, company, skills, experience, education, location, jobType, salary, category, icon, description, postedAt:new Date().toISOString() };
+    jobs.push(newJob);
+    saveJobs(jobs);
+    showToast(`"${title}" posted successfully! 🎉`, "success");
+    document.getElementById("form-success-msg").textContent = "Job posted! It is now visible to all users in recommendations.";
+    document.getElementById("form-success").classList.add("show");
+    resetForm();
+    document.getElementById("form-success").scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EDIT JOB
+═══════════════════════════════════════════════════════════ */
+function editJob(id) {
+  const job = getJobs().find(j=>j.id===id);
+  if (!job) return;
+  switchTab("post");
+  clearValidation();
+  document.getElementById("form-success").classList.remove("show");
+  document.getElementById("edit-id").value       = job.id;
+  document.getElementById("f-title").value       = job.title;
+  document.getElementById("f-company").value     = job.company;
+  document.getElementById("f-skills").value      = (job.skills||[]).join(", ");
+  document.getElementById("f-experience").value  = job.experience || "";
+  document.getElementById("f-education").value   = job.education  || "";
+  document.getElementById("f-location").value    = job.location   || "";
+  document.getElementById("f-jobtype").value     = job.jobType    || "";
+  document.getElementById("f-salary").value      = job.salary     || "";
+  document.getElementById("f-category").value    = job.category   || "Technology";
+  document.getElementById("f-icon").value        = job.icon       || "";
+  document.getElementById("f-description").value = job.description|| "";
+  document.getElementById("form-title").textContent = "Edit Job Posting";
+  document.getElementById("form-sub").textContent   = `Editing: ${job.title} at ${job.company}`;
+  document.getElementById("submit-icon").textContent = "💾";
+  document.getElementById("submit-text").textContent = "Save Changes";
+  document.getElementById("cancel-edit-btn").style.display = "inline-flex";
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DELETE
+═══════════════════════════════════════════════════════════ */
+function confirmDelete(id) {
+  const job = getJobs().find(j=>j.id===id);
+  if (!job) return;
+  pendingDeleteId = id;
+  document.getElementById("confirm-job-name").textContent = `${job.icon||"💼"} ${job.title} — ${job.company}`;
+  document.getElementById("confirm-modal").classList.add("open");
+}
+
+document.getElementById("confirm-delete-btn").addEventListener("click", () => {
+  if (!pendingDeleteId) return;
+  saveJobs(getJobs().filter(j=>j.id!==pendingDeleteId));
+  closeModal("confirm-modal");
+  pendingDeleteId = null;
+  renderDashboard();
+  renderManageTable();
+  showToast("Job deleted", "info");
+});
+
+/* ═══════════════════════════════════════════════════════════
+   VIEW JOB
+═══════════════════════════════════════════════════════════ */
+function viewJob(id) {
+  const job = getJobs().find(j=>j.id===id);
+  if (!job) return;
+  document.getElementById("view-modal-title").textContent = `${job.icon||"💼"} ${job.title}`;
+  document.getElementById("view-modal-body").innerHTML = `
+    <div style="margin-bottom:12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:13.5px;color:var(--muted)">🏢 ${esc(job.company)}</span>
+      <span style="color:var(--border)">·</span>
+      ${typeBadge(job.jobType)}
+      <span style="color:var(--border)">·</span>
+      <span style="font-size:12.5px;color:var(--muted)">Posted ${formatDate(job.postedAt)}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-key">Location</div><div class="detail-val">📍 ${esc(job.location)}</div></div>
+      <div class="detail-item"><div class="detail-key">Experience</div><div class="detail-val">${expBadge(job.experience)}</div></div>
+      <div class="detail-item"><div class="detail-key">Education</div><div class="detail-val">${esc(job.education||"Any")}</div></div>
+      <div class="detail-item"><div class="detail-key">Salary</div><div class="detail-val">${job.salary?"💰 "+esc(job.salary):"Not specified"}</div></div>
+      <div class="detail-item"><div class="detail-key">Category</div><div class="detail-val">${esc(job.category||"Technology")}</div></div>
+      <div class="detail-item"><div class="detail-key">Job ID</div><div class="detail-val" style="font-family:'DM Mono',monospace;font-size:12px">${esc(job.id)}</div></div>
+      <div class="detail-item full">
+        <div class="detail-key">Required Skills</div>
+        <div class="skills-cloud">${(job.skills||[]).map(s=>`<span class="skill-tag">${esc(s)}</span>`).join("")}</div>
+      </div>
+      <div class="detail-item full">
+        <div class="detail-key">Description</div>
+        <div class="detail-val" style="line-height:1.7">${esc(job.description)}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+      <button class="btn-submit" onclick="closeModal('view-modal');editJob('${job.id}')">✏️ Edit Job</button>
+      <button class="btn-ghost"  onclick="closeModal('view-modal');confirmDelete('${job.id}')">🗑 Delete</button>
+      <button class="btn-ghost"  onclick="closeModal('view-modal')">Close</button>
+    </div>`;
+  document.getElementById("view-modal").classList.add("open");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════ */
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll(".modal-backdrop").forEach(el => {
+  el.addEventListener("click", e => { if (e.target===el) el.classList.remove("open"); });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+function showToast(msg, type="info") {
+  const icons = { success:"✅", error:"❌", info:"ℹ️" };
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]||"ℹ️"}</span> ${msg}`;
+  document.getElementById("toast-wrap").appendChild(el);
+  setTimeout(() => { el.style.opacity="0"; el.style.transform="translateX(30px)"; el.style.transition="all .3s"; }, 2800);
+  setTimeout(() => el.remove(), 3200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BADGE HELPERS
+═══════════════════════════════════════════════════════════ */
+function typeBadge(type) {
+  const m = { "Full-time":"badge-green","Part-time":"badge-blue","Contract":"badge-amber",
+              "Internship":"badge-purple","Remote":"badge-blue","Freelance":"badge-gray" };
+  return `<span class="badge ${m[type]||"badge-gray"}">${type||"—"}</span>`;
+}
+function expBadge(exp) {
+  const m = { "Fresher (0 years)":"badge-green","Junior (1-3 years)":"badge-blue",
+              "Mid-level (3-5 years)":"badge-amber","Senior (5+ years)":"badge-red" };
+  return `<span class="badge ${m[exp]||"badge-gray"}">${exp||"Any"}</span>`;
+}
+function formatDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+}
+function esc(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+window.addEventListener("DOMContentLoaded", () => {
+  if (!localStorage.getItem(STORAGE_KEY)) seedAndGet();
+  if (checkSession()) {
+    document.getElementById("screen-login").style.display = "none";
+    document.getElementById("screen-dash").style.display  = "block";
+    switchTab("dashboard");
+  }
+});
+</script>
+</body>
+</html>

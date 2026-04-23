@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard – TalentTrack</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- GAP MODAL -->
+<div class="modal-overlay" id="gap-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📊 Skill Gap Analysis</h3>
+      <button class="modal-close" onclick="closeModal('gap-modal')">✕</button>
+    </div>
+    <div id="gap-body"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">TalentTrack</div>
+    <div class="nav-links">
+      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+      <span class="nav-username" id="nav-uname"></span>
+      <button class="nav-btn ghost" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dash-wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-item active" id="sb-profile"      onclick="showTab('profile')">      <span>👤</span> Profile</div>
+    <div class="sb-item"        id="sb-jobs"         onclick="showTab('jobs')">         <span>💼</span> Find Jobs</div>
+    <div class="sb-item"        id="sb-applications" onclick="showTab('applications')"> <span>📋</span> Applications</div>
+    <div class="sb-item"        id="sb-saved"        onclick="showTab('saved')">        <span>🔖</span> Saved Jobs</div>
+    <div class="sb-item"        id="sb-advisor"      onclick="showTab('advisor')">      <span>🤖</span> Career Advisor</div>
+    <div class="sb-divider"></div>
+    <div class="sb-item"                             onclick="doLogout()">              <span>🚪</span> Logout</div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dash-main">
+
+    <!-- ══════ PROFILE TAB ══════ -->
+    <div id="tab-profile" class="tab-pane active">
+      <div id="welcome-banner"></div>
+      <div class="card">
+        <div class="card-title">Personal Information</div>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label>    <input type="text"  id="pf-name"  placeholder="Your Name"/></div>
+          <div class="form-group"><label>Email</label>        <input type="email" id="pf-email" readonly class="readonly-inp"/></div>
+        </div>
+
+        <div class="card-title mt">Skills &amp; Experience</div>
+        <div class="form-group">
+          <label>Skills <span class="lbl-hint">(type a skill + press Enter to add · upload resume to auto-extract)</span></label>
+          <div class="skills-wrap" id="skills-wrap" onclick="document.getElementById('skill-inp').focus()">
+            <input type="text" id="skill-inp" placeholder="Add skill and press Enter..." onkeydown="handleSkillKey(event)"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Education</label>
+            <select id="pf-edu">
+              <option value="">Select Education</option>
+              <option>High School</option>
+              <option>Diploma</option>
+              <option>Bachelor's Degree</option>
+              <option>Master's Degree</option>
+              <option>PhD</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Experience Level</label>
+            <select id="pf-exp">
+              <option value="">Select Experience</option>
+              <option>Fresher (0 years)</option>
+              <option>Junior (1-2 years)</option>
+              <option>Mid-level (3-5 years)</option>
+              <option>Senior (5+ years)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label>Preferred Location</label><input type="text" id="pf-loc"  placeholder="e.g. Bangalore, Remote"/></div>
+          <div class="form-group"><label>Preferred Role</label>    <input type="text" id="pf-role" placeholder="e.g. Software Engineer"/></div>
+        </div>
+        <div class="form-group">
+          <label>Bio / About</label>
+          <textarea id="pf-bio" placeholder="Brief description about yourself..."></textarea>
+        </div>
+
+        <div class="card-title mt">Resume Upload</div>
+        <div class="info-banner">💡 Upload your PDF resume — skills are auto-extracted from the content!</div>
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('resume-inp').click()">
+          <div class="up-icon" id="up-icon">📎</div>
+          <strong class="up-label" id="up-label">Click to upload Resume</strong>
+          <p class="up-sub" id="up-sub">PDF, DOC, TXT · Max 5 MB · Skills auto-extracted</p>
+          <input type="file" id="resume-inp" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="handleResumeUpload(this)"/>
+        </div>
+        <div id="up-progress" class="upload-progress" style="display:none">
+          <span class="loading-ring"></span> Uploading &amp; extracting skills...
+        </div>
+
+        <div style="margin-top:1.2rem;display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="primary-btn" onclick="saveProfile()">💾 Save Profile</button>
+          <button class="secondary-btn" onclick="showTab('jobs')">🔍 Find Matching Jobs</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ JOBS TAB ══════ -->
+    <div id="tab-jobs" class="tab-pane" style="display:none">
+      <div class="tab-header">
+        <div>
+          <div class="page-title">Job Recommendations</div>
+          <div class="page-sub">Matched to your skill profile in real-time</div>
+        </div>
+        <div class="filters-row">
+          <div class="search-wrap">
+            <input type="text" id="job-search" placeholder="Search jobs..." oninput="debounceLoad()"/>
+          </div>
+          <select class="filter-sel" id="loc-f"  onchange="loadJobs()">
+            <option value="">All Locations</option>
+            <option>Remote</option><option>Bangalore</option><option>Hyderabad</option>
+            <option>Mumbai</option><option>Delhi</option>
+          </select>
+          <select class="filter-sel" id="exp-f"  onchange="loadJobs()">
+            <option value="">Any Experience</option>
+            <option>Fresher (0 years)</option><option>Junior (1-2 years)</option>
+            <option>Mid-level (3-5 years)</option><option>Senior (5+ years)</option>
+          </select>
+          <select class="filter-sel" id="type-f" onchange="loadJobs()">
+            <option value="">All Types</option>
+            <option>Full-time</option><option>Part-time</option>
+            <option>Contract</option><option>Internship</option>
+          </select>
+          <select class="filter-sel" id="sort-f" onchange="loadJobs()">
+            <option value="match">Best Match</option>
+            <option value="recent">Most Recent</option>
+          </select>
+        </div>
+      </div>
+      <div id="jobs-loader" class="loading-state" style="display:none">
+        <span class="loading-ring"></span> Finding your best matches...
+      </div>
+      <div id="jobs-grid" class="jobs-grid"></div>
+    </div>
+
+    <!-- ══════ APPLICATIONS TAB ══════ -->
+    <div id="tab-applications" class="tab-pane" style="display:none">
+      <div class="tab-header-s">
+        <div class="page-title">My Applications</div>
+        <div class="page-sub">Track all your job applications and their status</div>
+      </div>
+      <div class="table-card">
+        <div id="apps-loader" class="loading-state" style="display:none"><span class="loading-ring"></span></div>
+        <div id="apps-wrap"></div>
+      </div>
+    </div>
+
+    <!-- ══════ SAVED TAB ══════ -->
+    <div id="tab-saved" class="tab-pane" style="display:none">
+      <div class="tab-header-s">
+        <div class="page-title">Saved Jobs</div>
+        <div class="page-sub">Jobs you have bookmarked for later</div>
+      </div>
+      <div id="saved-grid" class="jobs-grid"></div>
+    </div>
+
+    <!-- ══════ ADVISOR TAB ══════ -->
+    <div id="tab-advisor" class="tab-pane" style="display:none">
+      <div class="tab-header-s">
+        <div class="page-title">🤖 Career Advisor</div>
+        <div class="page-sub">Personalised career guidance based on your skills</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Suggested Career Paths</div>
+        <div id="career-paths-wrap"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ask the Career Advisor</div>
+        <div class="chat-messages" id="chat-msgs"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-inp" placeholder="e.g. What skills should I learn for data science?"
+                 onkeydown="if(event.key==='Enter') sendChat()"/>
+          <button class="chat-send" onclick="sendChat()">Send →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <button class="mob-btn active" id="mnb-profile"      onclick="showTab('profile')">      <span>👤</span>Profile</button>
+  <button class="mob-btn"        id="mnb-jobs"         onclick="showTab('jobs')">         <span>💼</span>Jobs</button>
+  <button class="mob-btn"        id="mnb-applications" onclick="showTab('applications')"> <span>📋</span>Applied</button>
+  <button class="mob-btn"        id="mnb-saved"        onclick="showTab('saved')">        <span>🔖</span>Saved</button>
+  <button class="mob-btn"        id="mnb-advisor"      onclick="showTab('advisor')">      <span>🤖</span>Advisor</button>
+</nav>
+
+<script src="script.js"></script>
+<script>
+/* ── Auth guard ─────────────────────────────────────────── */
+const _tok  = localStorage.getItem("tt_token");
+const _uObj = JSON.parse(localStorage.getItem("tt_user")||"null");
+if (!_tok || !_uObj || _uObj.role !== "user") { window.location.href = "login.html"; }
+
+/* ── State ──────────────────────────────────────────────── */
+let skillsList  = [];
+let savedJobIds = [];
+let _debTimer   = null;
+
+/* ── Init ───────────────────────────────────────────────── */
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("nav-uname").textContent = _uObj.name || "";
+  loadProfile();
+});
+
+/* ══════════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════════ */
+const TABS = ["profile","jobs","applications","saved","advisor"];
+function showTab(name) {
+  TABS.forEach(t => {
+    const pane = document.getElementById("tab-" + t);
+    const sb   = document.getElementById("sb-" + t);
+    const mb   = document.getElementById("mnb-" + t);
+    if (pane) pane.style.display = t===name ? "block" : "none";
+    if (sb)   sb.classList.toggle("active", t===name);
+    if (mb)   mb.classList.toggle("active", t===name);
+  });
+  if (name==="jobs")         loadJobs();
+  if (name==="applications") loadApps();
+  if (name==="saved")        loadSaved();
+  if (name==="advisor")      loadAdvisor();
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROFILE
+══════════════════════════════════════════════════════════ */
+async function loadProfile() {
+  try {
+    const res = await apiGet("/api/users/profile");
+    if (!res.success) { toast("Failed to load profile","error"); return; }
+    const u = res.user;
+    localStorage.setItem("tt_user", JSON.stringify(u));
+
+    document.getElementById("pf-name").value  = u.name          || "";
+    document.getElementById("pf-email").value = u.email         || "";
+    document.getElementById("pf-edu").value   = u.education     || "";
+    document.getElementById("pf-exp").value   = u.experience    || "";
+    document.getElementById("pf-loc").value   = u.location      || "";
+    document.getElementById("pf-role").value  = u.preferredRole || "";
+    document.getElementById("pf-bio").value   = u.bio           || "";
+
+    skillsList  = u.skills || [];
+    savedJobIds = (u.savedJobs||[]).map(j=>(j._id||j).toString());
+    renderChips();
+    updateResumeUI(u.resumePath, u.resumeOriginalName);
+    renderBanner(u);
+  } catch(e) { toast("Profile load error: " + e.message,"error"); }
+}
+
+function renderBanner(u) {
+  const fields = ["skills","education","experience","location","preferredRole","resumePath"];
+  const filled = fields.filter(f => u[f] && (Array.isArray(u[f]) ? u[f].length : u[f])).length;
+  const pct    = Math.round(filled/fields.length*100);
+  document.getElementById("welcome-banner").innerHTML = `
+    <div class="welcome-banner">
+      <div>
+        <h2>Hello, ${u.name||"User"}! 👋</h2>
+        <p>Complete your profile for better job recommendations</p>
+      </div>
+      <div style="text-align:right">
+        <span style="font-size:.8rem;opacity:.85;display:block;margin-bottom:.3rem">Profile ${pct}% complete</span>
+        <div class="comp-bar"><div class="comp-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+async function saveProfile() {
+  const body = {
+    name:          document.getElementById("pf-name").value.trim(),
+    skills:        skillsList,
+    education:     document.getElementById("pf-edu").value,
+    experience:    document.getElementById("pf-exp").value,
+    location:      document.getElementById("pf-loc").value.trim(),
+    preferredRole: document.getElementById("pf-role").value.trim(),
+    bio:           document.getElementById("pf-bio").value.trim()
+  };
+  try {
+    const res = await apiPut("/api/users/profile", body);
+    if (res.success) {
+      localStorage.setItem("tt_user", JSON.stringify(res.user));
+      renderBanner(res.user);
+      toast("Profile saved! ✨","success");
+    } else toast(res.message,"error");
+  } catch { toast("Save failed","error"); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SKILL CHIPS
+══════════════════════════════════════════════════════════ */
+function renderChips() {
+  const wrap  = document.getElementById("skills-wrap");
+  const input = document.getElementById("skill-inp");
+  wrap.innerHTML = "";
+  skillsList.forEach((sk, i) => {
+    const c = document.createElement("span");
+    c.className = "skill-chip";
+    c.innerHTML = `${sk} <span class="rm-sk" onclick="removeSkill(${i})">✕</span>`;
+    wrap.appendChild(c);
+  });
+  wrap.appendChild(input);
+}
+
+function handleSkillKey(e) {
+  const inp = document.getElementById("skill-inp");
+  if (e.key==="Enter" || e.key===",") {
+    e.preventDefault();
+    const v = inp.value.trim().replace(/,$/,"").toLowerCase();
+    if (v && !skillsList.includes(v)) { skillsList.push(v); renderChips(); }
+    inp.value = "";
+  } else if (e.key==="Backspace" && !inp.value && skillsList.length) {
+    skillsList.pop(); renderChips();
+  }
+}
+
+function removeSkill(i) { skillsList.splice(i,1); renderChips(); }
+
+/* ══════════════════════════════════════════════════════════
+   RESUME UPLOAD
+══════════════════════════════════════════════════════════ */
+async function handleResumeUpload(inp) {
+  if (!inp.files || !inp.files[0]) return;
+  const file = inp.files[0];
+  document.getElementById("up-progress").style.display = "flex";
+  document.getElementById("upload-area").style.pointerEvents = "none";
+
+  const fd = new FormData();
+  fd.append("resume", file);
+  try {
+    const r = await fetch(API_BASE + "/api/users/resume", {
+      method: "POST",
+      headers: { Authorization:`Bearer ${localStorage.getItem("tt_token")}` },
+      body: fd
+    });
+    const res = await r.json();
+    if (res.success) {
+      updateResumeUI(res.resumePath, file.name);
+      res.skills.forEach(sk => { if (!skillsList.includes(sk)) skillsList.push(sk); });
+      renderChips();
+      toast(`✨ ${res.extractedSkills.length} skills extracted from your resume!`,"success");
+    } else {
+      toast(res.message || "Upload failed","error");
+    }
+  } catch(e) {
+    toast("Upload failed. Is the server running?","error");
+  } finally {
+    document.getElementById("up-progress").style.display = "none";
+    document.getElementById("upload-area").style.pointerEvents = "auto";
+  }
+}
+
+function updateResumeUI(rPath, rName) {
+  const area = document.getElementById("upload-area");
+  if (rPath) {
+    area.classList.add("has-file");
+    document.getElementById("up-icon").textContent  = "✅";
+    document.getElementById("up-label").textContent = rName || "Resume uploaded";
+    document.getElementById("up-sub").textContent   = "Click to replace · Skills auto-extracted";
+  } else {
+    area.classList.remove("has-file");
+    document.getElementById("up-icon").textContent  = "📎";
+    document.getElementById("up-label").textContent = "Click to upload Resume";
+    document.getElementById("up-sub").textContent   = "PDF, DOC, TXT · Max 5 MB · Skills auto-extracted";
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   JOBS
+══════════════════════════════════════════════════════════ */
+function debounceLoad() {
+  clearTimeout(_debTimer);
+  _debTimer = setTimeout(loadJobs, 400);
+}
+
+const CARD_COLS = ["#6C9DFF","#A78BFA","#6EE7B7","#FFB347","#FF6B8A","#34D399","#60A5FA","#F472B6"];
+
+async function loadJobs() {
+  const grid   = document.getElementById("jobs-grid");
+  const loader = document.getElementById("jobs-loader");
+  loader.style.display = "flex";
+  grid.innerHTML = "";
+
+  const p = new URLSearchParams();
+  const s  = document.getElementById("job-search")?.value || "";
+  const l  = document.getElementById("loc-f")?.value      || "";
+  const e  = document.getElementById("exp-f")?.value      || "";
+  const t  = document.getElementById("type-f")?.value     || "";
+  const o  = document.getElementById("sort-f")?.value     || "match";
+  if (s) p.set("search",s); if (l) p.set("location",l);
+  if (e) p.set("experience",e); if (t) p.set("type",t);
+  p.set("sort",o);
+
+  try {
+    const res = await apiGet("/api/jobs?" + p.toString());
+    loader.style.display = "none";
+    if (!res.success || !res.jobs || !res.jobs.length) {
+      grid.innerHTML = `<div class="no-results"><div class="big-icon">🔍</div><p>${!res.success ? "Cannot connect to server." : "No jobs match your filters."}</p></div>`;
+      return;
+    }
+    grid.innerHTML = res.jobs.map((j,i)=>buildJobCard(j,i)).join("");
+  } catch(e) {
+    loader.style.display = "none";
+    grid.innerHTML = `<div class="no-results"><div class="big-icon">⚠️</div><p>Cannot connect to server. Make sure the backend is running.</p></div>`;
+  }
+}
+
+function buildJobCard(job, i) {
+  const score   = job.matchScore   || 0;
+  const matched = job.matchedSkills|| [];
+  const isSaved = savedJobIds.includes((job._id||"").toString());
+  const bar     = score>=70?"#34D399":score>=40?"#6C9DFF":"#A78BFA";
+  const txt     = score>=70?"#059669":score>=40?"#2563eb":"#7c3aed";
+  const col     = CARD_COLS[i % CARD_COLS.length];
+
+  const sHTML = (job.requiredSkills||[]).map(sk => {
+    const m = matched.map(x=>x.toLowerCase()).includes(sk.toLowerCase());
+    return `<span class="stag ${m?"matched":""}">${m?"✓ ":""}${sk}</span>`;
+  }).join("");
+
+  // Encode gap data safely
+  const gd = {
+    t:job.title, co:job.company, ic:job.icon||"💼", cl:col,
+    sc:score, mt:job.matchedSkills||[], ms:job.missingSkills||[]
+  };
+  const enc = encodeURIComponent(JSON.stringify(gd));
+
+  return `
+  <div class="job-card${isSaved?" saved-card":""}" style="animation-delay:${i*.04}s">
+    <div class="jc-top">
+      <div class="jc-ico" style="background:${col}22">${job.icon||"💼"}</div>
+      <div style="flex:1">
+        <div class="jc-title">${job.title}</div>
+        <div class="jc-company">🏢 ${job.company}</div>
+      </div>
+    </div>
+    <div class="jc-meta">
+      <span class="mtag">📍 ${job.location||"Remote"}</span>
+      <span class="mtag">⏱ ${job.experience||"Any"}</span>
+      ${job.salary?`<span class="mtag">💰 ${job.salary}</span>`:""}
+      <span class="mtag">📌 ${job.jobType||"Full-time"}</span>
+    </div>
+    <div class="skills-row">${sHTML}</div>
+    <div class="match-sec">
+      <div class="match-lbl"><strong>Match Score</strong><span style="font-weight:800;color:${txt}">${score}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${score}%;background:${bar}"></div></div>
+    </div>
+    <div class="jc-actions">
+      <button class="apply-btn" onclick="applyJob('${job._id}',this)">Apply Now</button>
+      <button class="save-ico${isSaved?" is-saved":""}" onclick="toggleSave('${job._id}',this)" title="${isSaved?"Unsave":"Save"}">🔖</button>
+      <button class="gap-btn" onclick="openGap('${enc}')">📊 Gap</button>
+    </div>
+  </div>`;
+}
+
+async function applyJob(id, btn) {
+  btn.disabled = true;
+  btn.textContent = "Applying...";
+  try {
+    const res = await apiPost(`/api/jobs/${id}/apply`,{});
+    if (res.success) {
+      btn.textContent = "✅ Applied";
+      btn.classList.add("applied-btn");
+      toast(res.message,"success");
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Apply Now";
+      toast(res.message,"warning");
+      if (res.message && res.message.toLowerCase().includes("resume")) showTab("profile");
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = "Apply Now";
+    toast("Apply failed. Try again.","error");
+  }
+}
+
+async function toggleSave(id, btn) {
+  const was = btn.classList.contains("is-saved");
+  try {
+    const res = was
+      ? await apiDelete(`/api/users/saved/${id}`)
+      : await apiPost(`/api/users/saved/${id}`,{});
+    if (res.success) {
+      btn.classList.toggle("is-saved");
+      savedJobIds = was
+        ? savedJobIds.filter(x=>x!==id)
+        : [...savedJobIds, id];
+      toast(was?"Removed from saved":"Job saved! 🔖","info");
+    } else toast(res.message,"warning");
+  } catch { toast("Action failed","error"); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SKILL GAP MODAL
+══════════════════════════════════════════════════════════ */
+const COURSES_FE = {
+  python:            ["Python for Everybody – Coursera","Python Bootcamp – Udemy"],
+  react:             ["React – Complete Guide – Udemy","React.dev Official Docs – Free"],
+  javascript:        ["JavaScript.info – Free","freeCodeCamp JS – Free"],
+  sql:               ["SQL for Data Science – Coursera","SQLZoo – Interactive Free"],
+  "machine learning":["ML Specialization – Coursera","Fast.ai – Free"],
+  aws:               ["AWS Cloud Practitioner – aws.amazon.com","AWS Udemy Course"],
+  docker:            ["Docker Mastery – Udemy","Docker Official Docs – Free"],
+  nodejs:            ["Node.js Complete Guide – Udemy","The Odin Project – Free"],
+  typescript:        ["Understanding TypeScript – Udemy","TypeScript Handbook – Free"],
+  excel:             ["Excel Skills for Business – Coursera","ExcelJet – Free"],
+  tableau:           ["Tableau Desktop Specialist – Official","Tableau on Udemy"],
+  default:           ["Search Coursera – coursera.org","Search Udemy – udemy.com"]
+};
+
+function openGap(enc) {
+  let d;
+  try { d = JSON.parse(decodeURIComponent(enc)); } catch { toast("Error loading gap data","error"); return; }
+
+  const bar = d.sc>=70?"#34D399":d.sc>=40?"#6C9DFF":"#A78BFA";
+  const txt = d.sc>=70?"#059669":d.sc>=40?"#2563eb":"#7c3aed";
+
+  let html = `
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem">
+      <div style="width:46px;height:46px;border-radius:12px;background:${d.cl}22;display:flex;align-items:center;justify-content:center;font-size:1.3rem">${d.ic}</div>
+      <div><strong style="font-size:1rem">${d.t}</strong><div style="font-size:.82rem;color:var(--muted)">${d.co}</div></div>
+    </div>
+    <div class="match-sec" style="margin-bottom:1.2rem">
+      <div class="match-lbl"><strong>Your Match Score</strong><span style="font-weight:800;color:${txt}">${d.sc}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${d.sc}%;background:${bar}"></div></div>
+    </div>`;
+
+  if (d.mt && d.mt.length) {
+    html += `<div style="margin-bottom:1rem">
+      <strong style="font-size:.9rem">✅ Matched Skills (${d.mt.length})</strong>
+      <div class="skills-row" style="margin-top:.5rem">${d.mt.map(s=>`<span class="stag matched">✓ ${s}</span>`).join("")}</div>
+    </div>`;
+  }
+
+  if (d.ms && d.ms.length) {
+    const courseHtml = d.ms.map(ms => {
+      const key = Object.keys(COURSES_FE).find(k => ms.toLowerCase().includes(k) || k.includes(ms.toLowerCase())) || "default";
+      return (COURSES_FE[key]||COURSES_FE.default).slice(0,2).map(c => `<div class="course-row">📚 ${c}</div>`).join("");
+    }).join("");
+
+    html += `
+      <div style="margin-bottom:1rem">
+        <strong style="font-size:.9rem">⚠️ Missing Skills (${d.ms.length})</strong>
+        <div style="margin-top:.5rem">${d.ms.map(s=>`<div class="missing-row">🔴 ${s}</div>`).join("")}</div>
+      </div>
+      <div class="gap-tip">💡 Learning these skills could significantly boost your match for this role.</div>
+      <div style="margin-top:1rem">
+        <strong style="font-size:.9rem">📚 Recommended Courses to Close the Gap</strong>
+        <div style="margin-top:.5rem">${courseHtml}</div>
+      </div>`;
+  } else {
+    html += `<div class="gap-tip">🎉 You already have all required skills for this role — go ahead and apply!</div>`;
+  }
+
+  document.getElementById("gap-body").innerHTML = html;
+  document.getElementById("gap-modal").classList.add("open");
+}
+
+document.getElementById("gap-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeModal("gap-modal");
+});
+
+/* ══════════════════════════════════════════════════════════
+   APPLICATIONS
+══════════════════════════════════════════════════════════ */
+async function loadApps() {
+  const wrap   = document.getElementById("apps-wrap");
+  const loader = document.getElementById("apps-loader");
+  loader.style.display = "flex";
+  try {
+    const res = await apiGet("/api/users/applications");
+    loader.style.display = "none";
+    if (!res.success || !res.applications || !res.applications.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="big-icon">📋</div><p>No applications yet. Browse jobs and start applying!</p><button class="primary-btn" style="margin:0 auto" onclick="showTab('jobs')">Find Jobs →</button></div>`;
+      return;
+    }
+    const SC = {
+      "Applied":"s-applied","Under Review":"s-review","Shortlisted":"s-shortlisted",
+      "Interview Scheduled":"s-interview","Rejected":"s-rejected","Selected":"s-selected"
+    };
+    wrap.innerHTML = `
+      <table>
+        <thead><tr><th>#</th><th>Job Title</th><th>Company</th><th>Type</th><th>Applied On</th><th>Status</th></tr></thead>
+        <tbody>
+          ${res.applications.map((a,i) => `
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-weight:600">${a.jobTitle}</td>
+              <td>${a.company}</td>
+              <td>${a.jobType||"—"}</td>
+              <td>${new Date(a.appliedAt).toLocaleDateString("en-IN")}</td>
+              <td><span class="status-badge ${SC[a.status]||"s-applied"}">● ${a.status}</span></td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  } catch {
+    loader.style.display = "none";
+    wrap.innerHTML = `<div class="empty-state"><p>Failed to load applications.</p></div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SAVED JOBS
+══════════════════════════════════════════════════════════ */
+async function loadSaved() {
+  const grid = document.getElementById("saved-grid");
+  grid.innerHTML = `<div class="loading-state" style="grid-column:1/-1"><span class="loading-ring"></span> Loading saved jobs...</div>`;
+  try {
+    const res = await apiGet("/api/users/saved");
+    if (!res.success || !res.savedJobs || !res.savedJobs.length) {
+      grid.innerHTML = `<div class="no-results"><div class="big-icon">🔖</div><p>No saved jobs yet. Click 🔖 on any job card to save it.</p></div>`;
+      return;
+    }
+    grid.innerHTML = res.savedJobs.map((j,i) => `
+      <div class="job-card saved-card" style="animation-delay:${i*.04}s">
+        <div class="jc-top">
+          <div class="jc-ico" style="background:rgba(110,231,183,.15)">${j.icon||"💼"}</div>
+          <div style="flex:1"><div class="jc-title">${j.title}</div><div class="jc-company">🏢 ${j.company}</div></div>
+        </div>
+        <div class="jc-meta">
+          <span class="mtag">📍 ${j.location||"Remote"}</span>
+          ${j.salary?`<span class="mtag">💰 ${j.salary}</span>`:""}
+          <span class="mtag">📌 ${j.jobType||"Full-time"}</span>
+        </div>
+        <div class="skills-row">${(j.requiredSkills||[]).map(s=>`<span class="stag">${s}</span>`).join("")}</div>
+        <div class="jc-actions">
+          <button class="apply-btn" onclick="applyJob('${j._id}',this)">Apply Now</button>
+          <button class="save-ico is-saved" onclick="toggleSave('${j._id}',this);setTimeout(loadSaved,350)" title="Remove">🗑️</button>
+        </div>
+      </div>`).join("");
+  } catch {
+    grid.innerHTML = `<div class="no-results"><p>Failed to load saved jobs.</p></div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CAREER ADVISOR
+══════════════════════════════════════════════════════════ */
+async function loadAdvisor() {
+  const wrap = document.getElementById("career-paths-wrap");
+  const chat = document.getElementById("chat-msgs");
+
+  try {
+    const res = await apiPost("/api/jobs/advisor",{ message:"recommend", userSkills:skillsList });
+    if (res.success && res.topCareers && res.topCareers.length) {
+      const COLS = ["#6C9DFF","#A78BFA","#6EE7B7","#FFB347","#FF6B8A","#34D399"];
+      wrap.innerHTML = `<div class="advisor-grid">${res.topCareers.map((cp,i) => `
+        <div class="career-card">
+          <div style="font-size:2rem;margin-bottom:.6rem">${cp.icon}</div>
+          <h3 style="font-size:.95rem;font-weight:700;margin-bottom:.3rem">${cp.title}</h3>
+          <div style="font-size:.85rem;font-weight:700;color:${COLS[i%COLS.length]};margin-bottom:.6rem">${cp.score}% match</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem">Core skills:</div>
+          <div class="skills-row" style="gap:.3rem">${cp.skills.slice(0,4).map(s=>`<span class="stag" style="font-size:.68rem">${s}</span>`).join("")}</div>
+        </div>`).join("")}</div>`;
+    } else {
+      wrap.innerHTML = `<div class="empty-state"><div class="big-icon">🤖</div><p>Add skills to your profile to see career path recommendations.</p><button class="primary-btn" style="margin:0 auto" onclick="showTab('profile')">Add Skills →</button></div>`;
+    }
+
+    // Initial greeting if chat is empty
+    if (!chat.children.length) {
+      const topTitle = res.topCareers?.[0]?.title || "various tech roles";
+      addBotMsg(`Hello ${_uObj.name||"there"}! 👋 I'm your TalentTrack Career Advisor.<br><br>Based on your current skills, <b>${topTitle}</b> looks like a great fit. Ask me anything about career paths, skills to learn, salaries, or how to prepare for interviews!`);
+    }
+  } catch {
+    wrap.innerHTML = `<div class="empty-state"><p>Could not load advisor data. Is the server running?</p></div>`;
+  }
+}
+
+function addBotMsg(html) {
+  const chat = document.getElementById("chat-msgs");
+  const el   = document.createElement("div");
+  el.className = "chat-msg bot-msg";
+  el.innerHTML = html;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const chat = document.getElementById("chat-msgs");
+  const el   = document.createElement("div");
+  el.className   = "chat-msg user-msg";
+  el.textContent = text;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendChat() {
+  const inp = document.getElementById("chat-inp");
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = "";
+  addUserMsg(msg);
+  try {
+    const res = await apiPost("/api/jobs/advisor",{ message:msg, userSkills:skillsList });
+    if (res.success) addBotMsg(res.reply);
+    else addBotMsg("Sorry, I couldn't process that. Please try again.");
+  } catch {
+    addBotMsg("Sorry, I couldn't connect to the server. Please try again.");
+  }
+}
+</script>
+</body>
+</html>
