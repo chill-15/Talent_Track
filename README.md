@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Open: https://talenttrack-wxq1.onrender.com
+Open: http://localhost:5000
 
 ## LOGIN CREDENTIALS
 - Admin: admin@talenttrack.com / admin123
